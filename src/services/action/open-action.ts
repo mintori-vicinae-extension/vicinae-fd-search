@@ -2,6 +2,16 @@ import { exec } from "child_process";
 import * as path from "path";
 import { open as raycastOpen, showToast, Toast } from "@raycast/api";
 
+import { ApplicationPreference } from "../../types";
+
+export function getApplicationName(app?: ApplicationPreference): string {
+  if (!app) return "";
+  if (typeof app === "string") {
+    return path.basename(app).replace(/\.desktop$/, "");
+  }
+  return app.name || (app.path ? path.basename(app.path).replace(/\.desktop$/, "") : "");
+}
+
 export async function openFileWithDefaultApp(filePath: string): Promise<void> {
   const commands = [
     `xdg-open "${filePath}"`,
@@ -25,8 +35,50 @@ export async function openFileWithDefaultApp(filePath: string): Promise<void> {
   } catch (err: any) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Không thể mở file",
-      message: err?.message || "Không tìm thấy chương trình xử lý thích hợp"
+      title: "Cannot open file",
+      message: err?.message || "No handler found"
+    });
+  }
+}
+
+export async function openFileWithApp(
+  filePath: string,
+  app: ApplicationPreference
+): Promise<void> {
+  try {
+    const appTarget = typeof app === "string" ? app : (app.path || app.bundleId || app.name || "");
+    const appName = getApplicationName(app);
+
+    // If it's a desktop file name or path (e.g. "code.desktop", "/usr/share/applications/code.desktop")
+    const desktopFileName = path.basename(appTarget);
+    if (desktopFileName.endsWith(".desktop")) {
+      const commands = [
+        `gio launch "${appTarget}" "${filePath}"`,
+        `gio launch "${desktopFileName}" "${filePath}"`,
+        `gtk-launch "${desktopFileName.replace(/\.desktop$/, "")}" "${filePath}"`
+      ];
+      for (const cmd of commands) {
+        try {
+          await runExec(cmd);
+          return;
+        } catch {}
+      }
+    }
+
+    // Try executing via raycast open with app
+    try {
+      await raycastOpen(filePath, app as any);
+      return;
+    } catch {}
+
+    // CLI invocation
+    const cleanApp = appName || desktopFileName.replace(/\.desktop$/, "") || appTarget;
+    await runExec(`"${cleanApp}" "${filePath}"`);
+  } catch (err: any) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open with configured application",
+      message: err?.message || String(err)
     });
   }
 }

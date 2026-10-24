@@ -18,12 +18,22 @@ export interface FileItem {
   isDirectory: boolean;
 }
 
+export type ApplicationPreference =
+  | string
+  | {
+      name?: string;
+      path?: string;
+      bundleId?: string;
+      [key: string]: any;
+    };
+
 export interface ExtensionPreferences {
   rootPath?: string;
   maxResults?: string;
   showHidden?: boolean;
   usePlocate?: boolean;
   excludedDirs?: string;
+  shiftOpenApp?: ApplicationPreference;
 }
 
 export interface ParsedQuery {

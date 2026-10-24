@@ -18,7 +18,7 @@ import { searchWithFd } from "./services/search/fd-engine";
 import { searchWithPlocate } from "./services/search/plocate-engine";
 import { searchWithFind } from "./services/search/fallback-engine";
 import { generateFilePreview } from "./services/preview/preview-manager";
-import { openFileWithDefaultApp, revealInFileManager } from "./services/action/open-action";
+import { openFileWithDefaultApp, openFileWithApp, getApplicationName, revealInFileManager } from "./services/action/open-action";
 
 export default function Command() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -270,10 +270,19 @@ export default function Command() {
                       icon={Icon.Eye}
                       onAction={() => openFileWithDefaultApp(item.path)}
                     />
-                    <Action.OpenWith
-                      path={item.path}
-                      shortcut={{ modifiers: ["shift"], key: "enter" }}
-                    />
+                    {preferences.shiftOpenApp ? (
+                      <Action
+                        title={`Open with ${getApplicationName(preferences.shiftOpenApp) || "Application"}`}
+                        icon={Icon.AppWindow}
+                        shortcut={{ modifiers: ["shift"], key: "enter" }}
+                        onAction={() => openFileWithApp(item.path, preferences.shiftOpenApp!)}
+                      />
+                    ) : (
+                      <Action.OpenWith
+                        path={item.path}
+                        shortcut={{ modifiers: ["shift"], key: "enter" }}
+                      />
+                    )}
                     <Action
                       title="Reveal in File Manager"
                       icon={Icon.Folder}

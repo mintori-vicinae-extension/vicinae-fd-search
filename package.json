@@ -11,51 +11,58 @@
       "title": "Search Files",
       "subtitle": "fd File Search",
       "description": "Search files with instant preview, category filters, and graceful fallbacks",
-      "mode": "view",
-      "preferences": [
-        {
-          "name": "rootPath",
-          "title": "Search Root Directory",
-          "description": "Root directory to start searching from. Defaults to Home directory (~).",
-          "type": "textfield",
-          "required": false,
-          "default": "~"
-        },
-        {
-          "name": "maxResults",
-          "title": "Max Results",
-          "description": "Maximum number of file search results to display.",
-          "type": "textfield",
-          "required": false,
-          "default": "100"
-        },
-        {
-          "name": "showHidden",
-          "title": "Show Hidden Files",
-          "description": "Include hidden files (dotfiles) in search results.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Show hidden files",
-          "default": false
-        },
-        {
-          "name": "usePlocate",
-          "title": "Use System Index (plocate)",
-          "description": "Use system locate database instead of on-the-fly fd scanning for instant disk-wide search.",
-          "type": "checkbox",
-          "required": false,
-          "label": "Enable plocate hybrid index",
-          "default": false
-        },
-        {
-          "name": "excludedDirs",
-          "title": "Excluded Directories",
-          "description": "Comma-separated list of directories to ignore.",
-          "type": "textfield",
-          "required": false,
-          "default": "node_modules, .git, .cache, .local/share/Trash, target, dist, build, .venv, venv, __pycache__, .cargo, .npm"
-        }
-      ]
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rootPath",
+      "title": "Search Root Directory",
+      "description": "Root directory to start searching from. Defaults to Home directory (~).",
+      "type": "textfield",
+      "required": false,
+      "default": "~"
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of file search results to display.",
+      "type": "textfield",
+      "required": false,
+      "default": "100"
+    },
+    {
+      "name": "showHidden",
+      "title": "Show Hidden Files",
+      "description": "Include hidden files (dotfiles) in search results.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show hidden files",
+      "default": false
+    },
+    {
+      "name": "usePlocate",
+      "title": "Use System Index (plocate)",
+      "description": "Use system locate database instead of on-the-fly fd scanning for instant disk-wide search.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Enable plocate hybrid index",
+      "default": false
+    },
+    {
+      "name": "excludedDirs",
+      "title": "Excluded Directories",
+      "description": "Comma-separated list of directories to ignore.",
+      "type": "textfield",
+      "required": false,
+      "default": "node_modules, .git, .cache, .local/share/Trash, target, dist, build, .venv, venv, __pycache__, .cargo, .npm"
+    },
+    {
+      "name": "shiftOpenApp",
+      "title": "Alternative Application (Shift + Enter)",
+      "description": "Application to open file with [Shift + Enter] (e.g. Code editor, terminal, or specific app). Leave empty for system Open With dialog.",
+      "type": "appPicker",
+      "required": false
     }
   ],
   "dependencies": {
@@ -64,8 +71,8 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5",
-    "@types/react": "^19.0.10",
+    "@types/node": "^22.13.1",
+    "@types/react": "19.0.10",
     "esbuild": "^0.28.2",
     "typescript": "^5.7.0"
   },
