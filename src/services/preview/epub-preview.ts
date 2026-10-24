@@ -70,18 +70,15 @@ export async function getEpubPreview(filePath: string): Promise<{
     const opfContent = await runCommandWithTimeout("unzip", ["-p", filePath, opfPath], 3000);
     const opfDir = path.dirname(opfPath);
 
-    // 3. Extract metadata fields
+    // 3. Extract metadata fields for sidebar
     const title = extractTagValue(opfContent, "title") || "Không rõ";
     const author = extractTagValue(opfContent, "creator") || "Không rõ";
     const publisher = extractTagValue(opfContent, "publisher");
     const language = extractTagValue(opfContent, "language");
     const date = extractTagValue(opfContent, "date");
-    const description = extractTagValue(opfContent, "description");
+    const contributor = extractTagValue(opfContent, "contributor");
 
-    // 4. Try extracting cover image
-    let coverRelPath: string | null = null;
-
-    // A. Parse <item> elements in manifest
+    // 4. Parse <item> elements in manifest
     const items: Array<{ id: string; href: string; mediaType: string; properties: string }> = [];
     const itemRegex = /<item\b([^>]*?)\/?>/gi;
     let itemMatch: RegExpExecArray | null;
@@ -102,13 +99,22 @@ export async function getEpubPreview(filePath: string): Promise<{
       }
     }
 
+    // 5. Try extracting cover image
+    let coverRelPath: string | null = null;
+
     // Heuristic 1: meta name="cover"
     const metaCoverMatch = opfContent.match(/<meta\b[^>]*\bname=["']cover["'][^>]*\bcontent=["']([^"']+)["']/i) ||
       opfContent.match(/<meta\b[^>]*\bcontent=["']([^"']+)["'][^>]*\bname=["']cover["']/i);
     if (metaCoverMatch && metaCoverMatch[1]) {
-      const covId = metaCoverMatch[1];
-      const found = items.find((i) => i.id === covId);
-      if (found) coverRelPath = found.href;
+      const covVal = metaCoverMatch[1];
+      const foundById = items.find((i) => i.id === covVal);
+      if (foundById) {
+        coverRelPath = foundById.href;
+      } else {
+        const covBasename = path.basename(covVal).toLowerCase();
+        const foundByFile = items.find((i) => path.basename(i.href).toLowerCase() === covBasename);
+        if (foundByFile) coverRelPath = foundByFile.href;
+      }
     }
 
     // Heuristic 2: properties="cover-image"
@@ -123,9 +129,9 @@ export async function getEpubPreview(filePath: string): Promise<{
       if (found) coverRelPath = found.href;
     }
 
-    // Heuristic 4: first image item in manifest
+    // Heuristic 4: item href includes "cover" and mediaType is image
     if (!coverRelPath) {
-      const found = items.find((i) => i.mediaType.startsWith("image/"));
+      const found = items.find((i) => i.href.toLowerCase().includes("cover") && i.mediaType.startsWith("image/"));
       if (found) coverRelPath = found.href;
     }
 
@@ -146,7 +152,6 @@ export async function getEpubPreview(filePath: string): Promise<{
         coverImagePath = cachedImg;
       } else {
         try {
-          // Extract cover image to cache
           const buffer = await runCommandBinary("unzip", ["-p", filePath, normalizedPath], 3000);
           if (buffer && buffer.length > 0) {
             fs.writeFileSync(cachedImg, buffer);
@@ -156,28 +161,20 @@ export async function getEpubPreview(filePath: string): Promise<{
       }
     }
 
-    // 5. Build Markdown
+    // 6. Build Markdown: CHỈ HIỂN THỊ MỖI THUMBNAIL ẢNH BÌA
     let md = "";
     if (coverImagePath) {
-      md += `![Ảnh bìa sách](file://${encodeURI(coverImagePath)})\n\n`;
+      md = `![Ảnh bìa](file://${encodeURI(coverImagePath)})`;
+    } else {
+      md = `> 📖 **Sách điện tử (EPUB)**\n\n*Không tìm thấy ảnh bìa sách trong tệp.*`;
     }
 
-    md += `### 📖 Thông tin Sách điện tử (EPUB)\n\n`;
-    md += `- **Tiêu đề:** ${title}\n`;
-    md += `- **Tác giả:** ${author}\n`;
-    if (publisher) md += `- **Nhà xuất bản:** ${publisher}\n`;
-    if (language) md += `- **Ngôn ngữ:** ${language}\n`;
-    if (date) md += `- **Ngày xuất bản:** ${date.split("T")[0]}\n`;
-
-    if (description) {
-      const truncatedDesc = description.length > 500 ? `${description.slice(0, 500)}...` : description;
-      md += `\n**Giới thiệu tóm tắt:**\n> ${truncatedDesc}\n`;
-    }
-
+    // 7. Cột Sidebar Metadata
     const metadataExtra: Record<string, string> = {
       "Tiêu đề": title,
       "Tác giả": author
     };
+    if (contributor) metadataExtra["Đóng góp / Dịch"] = contributor;
     if (publisher) metadataExtra["Nhà xuất bản"] = publisher;
     if (language) metadataExtra["Ngôn ngữ"] = language;
     if (date) metadataExtra["Ngày xuất bản"] = date.split("T")[0];
