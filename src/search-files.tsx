@@ -4,6 +4,7 @@ import {
   ActionPanel,
   Action,
   Icon,
+  Image,
   getPreferenceValues,
   showToast,
   Toast
@@ -155,23 +156,8 @@ export default function Command() {
     }
   }, [selectedItemId, items, previewMap]);
 
-  function getItemIcon(item: FileItem): Icon {
-    switch (item.category) {
-      case "image":
-        return Icon.Image;
-      case "video":
-        return Icon.Video;
-      case "audio":
-        return Icon.Music;
-      case "document":
-        return Icon.Document;
-      case "code":
-        return Icon.Code;
-      case "archive":
-        return Icon.HardDrive;
-      default:
-        return Icon.BlankDocument;
-    }
+  function getItemIcon(item: FileItem): Image.ImageLike {
+    return { fileIcon: item.path };
   }
 
   const selectedItem = items.find((it) => it.id === selectedItemId) || items[0];
