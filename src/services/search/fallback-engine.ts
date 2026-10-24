@@ -9,6 +9,7 @@ export function searchWithFind(options: {
   searchTerm: string;
   rootPath: string;
   category: FileCategory;
+  customExtension?: string;
   showHidden: boolean;
   excludedDirs: string[];
   maxResults: number;
@@ -20,6 +21,7 @@ export function searchWithFind(options: {
     searchTerm,
     rootPath,
     category,
+    customExtension,
     showHidden,
     excludedDirs,
     maxResults,
@@ -54,7 +56,9 @@ export function searchWithFind(options: {
   }
 
   // Extensions
-  if (category !== "all" && CATEGORY_EXTENSIONS[category]) {
+  if (customExtension) {
+    args.push("-iname", `*.${customExtension}`);
+  } else if (category !== "all" && CATEGORY_EXTENSIONS[category]) {
     args.push("(");
     CATEGORY_EXTENSIONS[category].forEach((ext, idx) => {
       if (idx > 0) args.push("-o");

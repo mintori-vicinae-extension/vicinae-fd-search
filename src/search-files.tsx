@@ -32,9 +32,10 @@ export default function Command() {
   const abortCurrentSearchRef = useRef<(() => void) | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Parse raw text for potential prefix like "img: query"
+  // Parse raw text for potential prefix like "img: query" or custom extension like "epub: book"
   const parsed = useMemo(() => parseSearchQuery(rawSearchText), [rawSearchText]);
-  const activeCategory = parsed.categoryPrefix || selectedCategory;
+  // When a custom extension or category prefix is in the search box, it takes precedence
+  const activeCategory = parsed.customExtension ? "all" : (parsed.categoryPrefix || selectedCategory);
 
   const rootPath = useMemo(
     () => resolveHomePath(preferences.rootPath || "~"),
@@ -81,6 +82,7 @@ export default function Command() {
         searchTerm: parsed.searchTerm,
         rootPath,
         category: activeCategory,
+        customExtension: parsed.customExtension,
         showHidden: Boolean(preferences.showHidden),
         excludedDirs,
         maxResults,
@@ -122,6 +124,7 @@ export default function Command() {
     };
   }, [
     parsed.searchTerm,
+    parsed.customExtension,
     activeCategory,
     rootPath,
     maxResults,
@@ -180,7 +183,7 @@ export default function Command() {
       isShowingDetail={items.length > 0}
       onSearchTextChange={setRawSearchText}
       onSelectionChange={(id) => setSelectedItemId(id)}
-      searchBarPlaceholder="Search files... (e.g. img:, video:, doc:, code:, zip:)"
+      searchBarPlaceholder="Search files... (e.g. epub:, pdf:, img:, doc:, zip:)"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by File Type"
@@ -197,7 +200,13 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title={`Results (${items.length} files)`}>
+      <List.Section
+        title={
+          parsed.customExtension
+            ? `Results for *.${parsed.customExtension} (${items.length} files)`
+            : `Results (${items.length} files)`
+        }
+      >
         {items.map((item) => {
           const parentDir = path.dirname(item.path);
           const parentFolder = path.basename(parentDir);

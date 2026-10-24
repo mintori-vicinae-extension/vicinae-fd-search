@@ -9,6 +9,7 @@ export function searchWithPlocate(options: {
   searchTerm: string;
   rootPath: string;
   category: FileCategory;
+  customExtension?: string;
   showHidden: boolean;
   excludedDirs: string[];
   maxResults: number;
@@ -20,6 +21,7 @@ export function searchWithPlocate(options: {
     searchTerm,
     rootPath,
     category,
+    customExtension,
     showHidden,
     excludedDirs,
     maxResults,
@@ -49,7 +51,11 @@ export function searchWithPlocate(options: {
   }
 
   let lineBuffer = "";
-  const categoryExts = category !== "all" ? CATEGORY_EXTENSIONS[category] : null;
+  const categoryExts = customExtension
+    ? [customExtension.toLowerCase()]
+    : category !== "all"
+    ? CATEGORY_EXTENSIONS[category]
+    : null;
 
   proc.stdout.on("data", (chunk: Buffer) => {
     if (isCancelled || resultCount >= maxResults) return;

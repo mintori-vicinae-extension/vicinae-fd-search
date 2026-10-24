@@ -30,6 +30,7 @@ export interface ParsedQuery {
   rawQuery: string;
   searchTerm: string;
   categoryPrefix?: FileCategory;
+  customExtension?: string;
 }
 
 export interface PreviewData {

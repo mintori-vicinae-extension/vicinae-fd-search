@@ -17,6 +17,18 @@ async function runTests() {
     throw new Error("Query parser failed for archive: prefix");
   }
 
+  const p3 = parseSearchQuery("epub: dac nhan tam");
+  console.log("Parsed 'epub: dac nhan tam':", p3);
+  if (p3.customExtension !== "epub" || p3.searchTerm !== "dac nhan tam") {
+    throw new Error("Query parser failed for epub: custom extension");
+  }
+
+  const p4 = parseSearchQuery("pdf:annual-report");
+  console.log("Parsed 'pdf:annual-report':", p4);
+  if (p4.customExtension !== "pdf" || p4.searchTerm !== "annual-report") {
+    throw new Error("Query parser failed for pdf:annual-report");
+  }
+
   console.log("\n=== 2. TEST FD SEARCH ENGINE ===");
   const foundItems: FileItem[] = [];
   await new Promise<void>((resolve, reject) => {
@@ -47,6 +59,30 @@ async function runTests() {
   }
   if (foundItems.length === 0) {
     throw new Error("No files found in test directory!");
+  }
+
+  // Test customExtension option in fd search
+  console.log("\n=== 2.1 TEST FD WITH CUSTOM EXTENSION (ts) ===");
+  const tsItems: FileItem[] = [];
+  await new Promise<void>((resolve, reject) => {
+    searchWithFd({
+      searchTerm: "",
+      rootPath: "/tmp/vicinae-test-workspace",
+      category: "all",
+      customExtension: "ts",
+      showHidden: false,
+      excludedDirs: ["node_modules", "build"],
+      maxResults: 20,
+      onItem: (item) => {
+        tsItems.push(item);
+      },
+      onError: (err) => reject(err),
+      onFinish: () => resolve()
+    });
+  });
+  console.log(`Found ${tsItems.length} ts files:`, tsItems.map(i => i.name));
+  if (tsItems.length !== 1 || !tsItems[0].name.endsWith(".ts")) {
+    throw new Error("Custom extension search with fd failed!");
   }
 
   console.log("\n=== 3. TEST PREVIEWS GENERATION ===");
