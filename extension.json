@@ -1,0 +1,68 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "vicinae-fd-search",
+  "title": "FD File Search",
+  "description": "Blazing fast file search with rich previews, category filtering, and smart fallbacks",
+  "icon": "assets/icon.png",
+  "author": "mintori",
+  "license": "MIT",
+  "platforms": ["Linux"],
+  "categories": ["Productivity", "System"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Files",
+      "subtitle": "fd File Search with Preview",
+      "description": "Search files with instant preview, category filters, and graceful fallbacks",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rootPath",
+          "title": "Search Root Directory",
+          "description": "Root directory to start searching from. Defaults to Home directory (~).",
+          "type": "textfield",
+          "required": false,
+          "default": "~"
+        },
+        {
+          "name": "maxResults",
+          "title": "Max Results",
+          "description": "Maximum number of file search results to display.",
+          "type": "textfield",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "showHidden",
+          "title": "Show Hidden Files",
+          "description": "Include hidden files (dotfiles) in search results.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show hidden files",
+          "default": false
+        },
+        {
+          "name": "usePlocate",
+          "title": "Use System Index (plocate)",
+          "description": "Use system locate database instead of on-the-fly fd scanning for instant disk-wide search.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Enable plocate hybrid index",
+          "default": false
+        },
+        {
+          "name": "excludedDirs",
+          "title": "Excluded Directories",
+          "description": "Comma-separated list of directories to ignore.",
+          "type": "textfield",
+          "required": false,
+          "default": "node_modules, .git, .cache, .local/share/Trash, target, dist, build, .venv, venv, __pycache__, .cargo, .npm"
+        }
+      ]
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@vicinae/api": "^0.22.2"
+  }
+}

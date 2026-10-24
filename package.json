@@ -1,0 +1,77 @@
+{
+  "name": "vicinae-fd-search",
+  "title": "FD File Search",
+  "description": "Blazing fast file search with rich previews, category filtering, and smart fallbacks for Vicinae.",
+  "icon": "icon.png",
+  "author": "mintori",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "subtitle": "fd File Search",
+      "description": "Search files with instant preview, category filters, and graceful fallbacks",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rootPath",
+          "title": "Search Root Directory",
+          "description": "Root directory to start searching from. Defaults to Home directory (~).",
+          "type": "textfield",
+          "required": false,
+          "default": "~"
+        },
+        {
+          "name": "maxResults",
+          "title": "Max Results",
+          "description": "Maximum number of file search results to display.",
+          "type": "textfield",
+          "required": false,
+          "default": "100"
+        },
+        {
+          "name": "showHidden",
+          "title": "Show Hidden Files",
+          "description": "Include hidden files (dotfiles) in search results.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show hidden files",
+          "default": false
+        },
+        {
+          "name": "usePlocate",
+          "title": "Use System Index (plocate)",
+          "description": "Use system locate database instead of on-the-fly fd scanning for instant disk-wide search.",
+          "type": "checkbox",
+          "required": false,
+          "label": "Enable plocate hybrid index",
+          "default": false
+        },
+        {
+          "name": "excludedDirs",
+          "title": "Excluded Directories",
+          "description": "Comma-separated list of directories to ignore.",
+          "type": "textfield",
+          "required": false,
+          "default": "node_modules, .git, .cache, .local/share/Trash, target, dist, build, .venv, venv, __pycache__, .cargo, .npm"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.0.10",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "tsc --noEmit && esbuild src/search-files.tsx --bundle --platform=node --target=node22 --external:@raycast/api --external:@vicinae/api --external:react --external:react/jsx-runtime --outfile=dist/index.js",
+    "install:vicinae": "npm run build && mkdir -p /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/assets && cp dist/index.js /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/index.js && cp extension.json /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/package.json && (cp assets/* /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/assets/ || true)",
+    "typecheck": "tsc --noEmit"
+  }
+}
