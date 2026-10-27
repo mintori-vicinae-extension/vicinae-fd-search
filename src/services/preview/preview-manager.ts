@@ -11,6 +11,7 @@ import { getSqlitePreview } from "./sqlite-preview";
 import { getOfficePreview } from "./office-preview";
 import { getFontPreview } from "./font-preview";
 import { getEpubPreview } from "./epub-preview";
+import { getGitRepoPreview } from "./git-preview";
 
 export async function generateFilePreview(item: FileItem): Promise<PreviewData> {
   const ext = item.extension.toLowerCase().replace(/^\./, "");
@@ -24,14 +25,20 @@ export async function generateFilePreview(item: FileItem): Promise<PreviewData> 
     path: item.path,
     size: stats ? formatBytes(stats.size) : formatBytes(item.size),
     mtime: stats ? formatDate(stats.mtime) : formatDate(item.mtime),
-    type: ext ? ext.toUpperCase() : "File",
+    type: item.category === "git" ? "Git Repository" : (ext ? ext.toUpperCase() : (item.isDirectory ? "Folder" : "File")),
     permissions: stats ? (stats.mode & parseInt("777", 8)).toString(8) : undefined
   };
 
   let markdown = "";
 
   try {
-    if (item.category === "image") {
+    if (item.category === "git") {
+      const res = await getGitRepoPreview(item.path);
+      markdown = res.markdown;
+      if (res.metadata) {
+        metadata.extra = res.metadata;
+      }
+    } else if (item.category === "image") {
       markdown = getImagePreview(item.path).markdown;
     } else if (ext === "pdf") {
       const res = await getPdfPreview(item.path);

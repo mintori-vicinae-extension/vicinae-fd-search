@@ -110,6 +110,30 @@ export async function revealInFileManager(filePath: string): Promise<void> {
   }
 }
 
+export async function openInTerminal(dirPath: string): Promise<void> {
+  const terminals = [
+    `kitty --directory "${dirPath}"`,
+    `alacritty --working-directory "${dirPath}"`,
+    `wezterm start --cwd "${dirPath}"`,
+    `foot -D "${dirPath}"`,
+    `ghostty --working-directory="${dirPath}"`,
+    `xterm -e "cd '${dirPath}' && $SHELL"`
+  ];
+
+  for (const cmd of terminals) {
+    try {
+      await runExec(cmd);
+      return;
+    } catch {}
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Cannot open terminal",
+    message: "No supported terminal emulator found"
+  });
+}
+
 function runExec(cmd: string): Promise<void> {
   return new Promise((resolve, reject) => {
     exec(cmd, (err) => {

@@ -5,7 +5,8 @@ export type FileCategory =
   | "audio"
   | "document"
   | "code"
-  | "archive";
+  | "archive"
+  | "git";
 
 export interface FileItem {
   id: string;

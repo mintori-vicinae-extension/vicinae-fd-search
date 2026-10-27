@@ -17,8 +17,16 @@ import { parseSearchQuery } from "./utils/query-parser";
 import { searchWithFd } from "./services/search/fd-engine";
 import { searchWithPlocate } from "./services/search/plocate-engine";
 import { searchWithFind } from "./services/search/fallback-engine";
+import { searchGitRepositories } from "./services/search/git-repo-engine";
 import { generateFilePreview } from "./services/preview/preview-manager";
-import { openFileWithDefaultApp, openFileWithApp, getApplicationName, revealInFileManager } from "./services/action/open-action";
+import { parseRemoteWebUrl } from "./services/preview/git-preview";
+import {
+  openFileWithDefaultApp,
+  openFileWithApp,
+  getApplicationName,
+  revealInFileManager,
+  openInTerminal
+} from "./services/action/open-action";
 
 export default function Command() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
@@ -105,7 +113,29 @@ export default function Command() {
         }
       };
 
-      if (preferences.usePlocate && hasPlocate) {
+      if (activeCategory === "git") {
+        cancelSearch = searchGitRepositories({
+          searchTerm: parsed.searchTerm,
+          rootPath,
+          maxResults,
+          onItem: (newItem: FileItem) => {
+            setItems((prev) => {
+              if (prev.some((it) => it.id === newItem.id)) return prev;
+              return [...prev, newItem];
+            });
+          },
+          onError: async (err: Error) => {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Git Search Error",
+              message: err.message
+            });
+          },
+          onFinish: () => {
+            setIsLoading(false);
+          }
+        });
+      } else if (preferences.usePlocate && hasPlocate) {
         cancelSearch = searchWithPlocate(searchOptions);
       } else if (hasFd) {
         cancelSearch = searchWithFd(searchOptions);
@@ -157,6 +187,9 @@ export default function Command() {
   }, [selectedItemId, items, previewMap]);
 
   function getItemIcon(item: FileItem): Image.ImageLike {
+    if (item.category === "git") {
+      return Icon.Box;
+    }
     return { fileIcon: item.path };
   }
 
@@ -169,7 +202,7 @@ export default function Command() {
       isShowingDetail={items.length > 0}
       onSearchTextChange={setRawSearchText}
       onSelectionChange={(id) => setSelectedItemId(id)}
-      searchBarPlaceholder="Search files... (e.g. epub:, pdf:, img:, doc:, zip:)"
+      searchBarPlaceholder="Search files... (e.g. git:, epub:, pdf:, img:, doc:)"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by File Type"
@@ -177,6 +210,7 @@ export default function Command() {
           onChange={(val) => setSelectedCategory(val as FileCategory)}
         >
           <List.Dropdown.Item title="All Files" value="all" icon={Icon.Globe} />
+          <List.Dropdown.Item title="Git Repositories" value="git" icon={Icon.Box} />
           <List.Dropdown.Item title="Images" value="image" icon={Icon.Image} />
           <List.Dropdown.Item title="Videos" value="video" icon={Icon.Video} />
           <List.Dropdown.Item title="Audio" value="audio" icon={Icon.Music} />
@@ -188,7 +222,9 @@ export default function Command() {
     >
       <List.Section
         title={
-          parsed.customExtension
+          activeCategory === "git"
+            ? `Git Repositories (${items.length} repos)`
+            : parsed.customExtension
             ? `Results for *.${parsed.customExtension} (${items.length} files)`
             : `Results (${items.length} files)`
         }
@@ -266,7 +302,7 @@ export default function Command() {
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action
-                      title="Open File"
+                      title={item.category === "git" ? "Open Repository" : "Open File"}
                       icon={Icon.Eye}
                       onAction={() => openFileWithDefaultApp(item.path)}
                     />
@@ -282,6 +318,26 @@ export default function Command() {
                         path={item.path}
                         shortcut={{ modifiers: ["shift"], key: "enter" }}
                       />
+                    )}
+                    {item.category === "git" && (
+                      <Action
+                        title="Open in Terminal"
+                        icon={Icon.Terminal}
+                        shortcut={{ modifiers: ["ctrl"], key: "t" }}
+                        onAction={() => openInTerminal(item.path)}
+                      />
+                    )}
+                    {item.category === "git" && selectedPreview?.metadata?.extra?.["Remote URL"] && (
+                      (() => {
+                        const webUrl = parseRemoteWebUrl(selectedPreview.metadata.extra["Remote URL"]);
+                        return webUrl ? (
+                          <Action.OpenInBrowser
+                            title="Open Remote Repository"
+                            url={webUrl}
+                            shortcut={{ modifiers: ["ctrl"], key: "o" }}
+                          />
+                        ) : null;
+                      })()
                     )}
                     <Action
                       title="Reveal in File Manager"

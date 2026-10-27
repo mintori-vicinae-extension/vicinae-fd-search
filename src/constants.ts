@@ -11,7 +11,8 @@ export const CATEGORY_EXTENSIONS: Record<Exclude<FileCategory, "all">, string[]>
     "xml", "conf", "config", "ini", "env", "diff", "patch", "log", "properties", "gradle", "cmake",
     "makefile", "dockerfile", "graphql", "gql", "proto", "vue", "svelte", "swift", "rb", "php", "r", "dart", "zig"
   ],
-  archive: ["zip", "tar", "gz", "tgz", "7z", "rar", "bz2", "xz"]
+  archive: ["zip", "tar", "gz", "tgz", "7z", "rar", "bz2", "xz"],
+  git: []
 };
 
 export const PREFIX_MAP: Record<string, FileCategory> = {
@@ -29,7 +30,9 @@ export const PREFIX_MAP: Record<string, FileCategory> = {
   "code:": "code",
   "src:": "code",
   "zip:": "archive",
-  "archive:": "archive"
+  "archive:": "archive",
+  "git:": "git",
+  "repo:": "git"
 };
 
 export const DEFAULT_EXCLUDED_DIRS = [
