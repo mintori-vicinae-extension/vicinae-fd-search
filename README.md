@@ -36,13 +36,36 @@ Blazing fast file search extension for [Vicinae](https://vicinae.com) (compatibl
 
 ---
 
+## Dependencies
+
+### System & CLI Tools
+
+- **Runtime / Build**: `node` (Node.js 22+), `npm`
+- **Search Engines**:
+  - `fd` — Primary fast file & Git repository search engine (falls back to `find` if unavailable)
+  - `plocate` (`locate`) — *Optional*, for hybrid disk-wide index search
+- **Rich Previews** *(optional — each preview degrades gracefully if the tool is missing)*:
+  - `ffmpeg` / `ffprobe` / `ffmpegthumbnailer` — Video thumbnails and audio/video metadata
+  - `poppler-utils` (`pdftoppm`, `pdftotext`) — PDF page thumbnails and text extraction
+  - `unzip`, `tar`, `7z` — Archive listing, EPUB metadata/covers, and Office (`.docx`, `.xlsx`, `.pptx`) XML previews
+  - `sqlite3` — SQLite database tables and schema inspection
+  - `magick` (ImageMagick) — Font typography preview rendering
+  - `git` — Git repository branch, status, and recent commits preview (`git:` prefix)
+
+### NPM Packages
+
+- **Dependencies**: `@raycast/api`, `react`, `react-dom`
+- **Dev Dependencies**: `typescript`, `esbuild`, `@types/node`, `@types/react`
+
+---
+
 ## Installation & Setup
 
 1. Clone or place this repository into your Vicinae extensions folder:
 
    ```bash
    cd ~/.local/share/vicinae/extensions # or your configured extensions path
-   git clone https://github.com/mintori/vicinae-fd-search.git
+   git clone https://github.com/mintori-vicinae-extension/vicinae-fd-search.git
    cd vicinae-fd-search
    npm install
    npm run build
