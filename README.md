@@ -57,6 +57,28 @@ Blazing fast file search extension for [Vicinae](https://vicinae.com) (compatibl
 - **Dependencies**: `@raycast/api`, `react`, `react-dom`
 - **Dev Dependencies**: `typescript`, `esbuild`, `@types/node`, `@types/react`
 
+### Quick Install (System Dependencies)
+
+- **Ubuntu / Debian**:
+
+  ```bash
+  sudo apt update && sudo apt install -y fd-find plocate ffmpeg ffmpegthumbnailer poppler-utils unzip tar p7zip-full sqlite3 imagemagick git nodejs npm
+  # Ubuntu/Debian names the fd binary `fdfind`; symlink it to `fd`:
+  sudo ln -s "$(which fdfind)" /usr/local/bin/fd
+  ```
+
+- **Arch Linux**:
+
+  ```bash
+  sudo pacman -S --needed fd plocate ffmpeg ffmpegthumbnailer poppler unzip tar 7zip sqlite imagemagick git nodejs npm
+  ```
+
+- **Fedora**:
+
+  ```bash
+  sudo dnf install -y fd-find plocate ffmpeg-free ffmpegthumbnailer poppler-utils unzip tar p7zip p7zip-plugins sqlite ImageMagick git nodejs npm
+  ```
+
 ---
 
 ## Installation & Setup
