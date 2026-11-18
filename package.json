@@ -78,7 +78,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit && esbuild src/search-files.tsx --bundle --platform=node --target=node22 --external:@raycast/api --external:@vicinae/api --external:react --external:react/jsx-runtime --outfile=dist/index.js",
-    "install:vicinae": "npm run build && mkdir -p /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/assets && cp dist/index.js /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/index.js && cp extension.json /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/package.json && (cp assets/* /home/mintori/.local/share/vicinae/extensions/vicinae-fd-search/assets/ || true)",
+    "install:vicinae": "npm run build && mkdir -p $HOME/.local/share/vicinae/extensions/vicinae-fd-search/assets && cp dist/index.js $HOME/.local/share/vicinae/extensions/vicinae-fd-search/index.js && cp extension.json $HOME/.local/share/vicinae/extensions/vicinae-fd-search/package.json && (cp assets/* $HOME/.local/share/vicinae/extensions/vicinae-fd-search/assets/ || true)",
     "typecheck": "tsc --noEmit"
   }
 }

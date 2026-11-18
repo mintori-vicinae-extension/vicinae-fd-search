@@ -37,14 +37,28 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [previewMap, setPreviewMap] = useState<Record<string, PreviewData>>({});
+  const [manualHiddenToggle, setManualHiddenToggle] = useState<boolean | null>(null);
 
   const abortCurrentSearchRef = useRef<(() => void) | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Parse raw text for potential prefix like "img: query" or custom extension like "epub: book"
+  // Parse raw text for potential prefix like "img: query", "video,epub: book", "hidden: config"
   const parsed = useMemo(() => parseSearchQuery(rawSearchText), [rawSearchText]);
-  // When a custom extension or category prefix is in the search box, it takes precedence
-  const activeCategory = parsed.customExtension ? "all" : (parsed.categoryPrefix || selectedCategory);
+
+  // Determine effective show hidden state:
+  // 1. If prefix explicitly has hidden: or h: -> true
+  // 2. Else if user toggled via hotkey Ctrl+H -> manualHiddenToggle
+  // 3. Else fallback to preferences.showHidden
+  const effectiveShowHidden = useMemo(() => {
+    if (parsed.showHidden) return true;
+    if (manualHiddenToggle !== null) return manualHiddenToggle;
+    return Boolean(preferences.showHidden);
+  }, [parsed.showHidden, manualHiddenToggle, preferences.showHidden]);
+
+  // When custom extension or multi filter extensions are in the search box, category dropdown is overridden
+  const activeCategory = parsed.filterExtensions || parsed.customExtension
+    ? "all"
+    : (parsed.categoryPrefix || selectedCategory);
 
   const rootPath = useMemo(
     () => resolveHomePath(preferences.rootPath || "~"),
@@ -92,7 +106,8 @@ export default function Command() {
         rootPath,
         category: activeCategory,
         customExtension: parsed.customExtension,
-        showHidden: Boolean(preferences.showHidden),
+        extensions: parsed.filterExtensions,
+        showHidden: effectiveShowHidden,
         excludedDirs,
         maxResults,
         onItem: (newItem: FileItem) => {
@@ -156,11 +171,12 @@ export default function Command() {
   }, [
     parsed.searchTerm,
     parsed.customExtension,
+    parsed.filterExtensions,
+    effectiveShowHidden,
     activeCategory,
     rootPath,
     maxResults,
     excludedDirs,
-    preferences.showHidden,
     preferences.usePlocate
   ]);
 
@@ -350,12 +366,20 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title="Copy File Path"
                       content={item.path}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                     />
                     <Action.CopyToClipboard
                       title="Copy File Name"
                       content={item.name}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
+                    />
+                  </ActionPanel.Section>
+                  <ActionPanel.Section>
+                    <Action
+                      title={effectiveShowHidden ? "Hide Hidden Files" : "Show Hidden Files"}
+                      icon={effectiveShowHidden ? Icon.EyeDisabled : Icon.Eye}
+                      shortcut={{ modifiers: ["ctrl"], key: "h" }}
+                      onAction={() => setManualHiddenToggle(!effectiveShowHidden)}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

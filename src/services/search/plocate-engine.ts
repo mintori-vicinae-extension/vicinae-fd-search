@@ -10,6 +10,7 @@ export function searchWithPlocate(options: {
   rootPath: string;
   category: FileCategory;
   customExtension?: string;
+  extensions?: string[];
   showHidden: boolean;
   excludedDirs: string[];
   maxResults: number;
@@ -22,6 +23,7 @@ export function searchWithPlocate(options: {
     rootPath,
     category,
     customExtension,
+    extensions,
     showHidden,
     excludedDirs,
     maxResults,
@@ -51,7 +53,9 @@ export function searchWithPlocate(options: {
   }
 
   let lineBuffer = "";
-  const categoryExts = customExtension
+  const categoryExts = extensions && extensions.length > 0
+    ? extensions.map((e) => e.toLowerCase())
+    : customExtension
     ? [customExtension.toLowerCase()]
     : category !== "all"
     ? CATEGORY_EXTENSIONS[category]

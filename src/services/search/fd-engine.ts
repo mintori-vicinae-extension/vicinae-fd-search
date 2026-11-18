@@ -10,6 +10,7 @@ export function searchWithFd(options: {
   rootPath: string;
   category: FileCategory;
   customExtension?: string;
+  extensions?: string[];
   showHidden: boolean;
   excludedDirs: string[];
   maxResults: number;
@@ -22,6 +23,7 @@ export function searchWithFd(options: {
     rootPath,
     category,
     customExtension,
+    extensions,
     showHidden,
     excludedDirs,
     maxResults,
@@ -48,7 +50,11 @@ export function searchWithFd(options: {
     }
   }
 
-  if (customExtension) {
+  if (extensions && extensions.length > 0) {
+    for (const ext of extensions) {
+      args.push("-e", ext);
+    }
+  } else if (customExtension) {
     args.push("-e", customExtension);
   } else if (category !== "all" && CATEGORY_EXTENSIONS[category]) {
     for (const ext of CATEGORY_EXTENSIONS[category]) {

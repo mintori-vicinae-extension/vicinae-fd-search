@@ -42,6 +42,8 @@ export interface ParsedQuery {
   searchTerm: string;
   categoryPrefix?: FileCategory;
   customExtension?: string;
+  filterExtensions?: string[];
+  showHidden?: boolean;
 }
 
 export interface PreviewData {
